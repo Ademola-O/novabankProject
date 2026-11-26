@@ -1,0 +1,12 @@
+{
+  "name": "novabank-dashboard",
+  "version": "1.0.0",
+  "description": "A small banking dashboard built with vanilla JavaScript: deposit, withdraw and transfer between accounts.",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "python3 -m http.server 8000",
+    "test": "node --test"
+  },
+  "license": "MIT"
+}

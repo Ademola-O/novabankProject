@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="NovaBank Pro: a banking dashboard demo. Deposit, withdraw and transfer money between accounts.">
+    <meta name="color-scheme" content="dark light">
+
+    <title>NovaBank Pro | Dashboard</title>
+
+    <!-- A bank emoji as the tab icon, built into the page so the browser never asks for a missing favicon file -->
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8F%A6%3C/text%3E%3C/svg%3E">
+
+    <!-- Sets the light/dark theme BEFORE the page is drawn, so there is no flash of the wrong colours -->
+    <script src="js/theme-init.js"></script>
+
+    <!-- Font: preconnect starts the connection early; display=swap shows text straight away in a fallback font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="css/style.css">
+
+    <!--
+        Chart.js, pinned to an exact version (4.4.7) so an update can't change it unexpectedly.
+        "integrity" is a fingerprint of the file: the browser refuses to run it if even one
+        character differs, which protects you if the CDN is ever tampered with.
+        "defer" lets the page load first; it still runs before main.js.
+        If this fails to load, the chart is skipped and everything else still works.
+    -->
+    <script defer
+            src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.js"
+            integrity="sha384-zYPBGXwO4633CABX/5Spf6emCKUJCfoOkhOMYyxMsatqQZPnDblmmOewfjsIVWCM"
+            crossorigin="anonymous"></script>
+</head>
+
+<body>
+
+    <!-- Lets keyboard users jump straight past the navigation -->
+    <a class="skip-link" href="#main-content">Skip to main content</a>
+
+    <div class="app">
+
+        <!-- ================= SIDEBAR ================= -->
+        <aside class="sidebar">
+
+            <div>
+                <div class="logo">NovaBank</div>
+
+                <nav class="nav-links" aria-label="Main">
+                    <a href="#" aria-current="page">Dashboard</a>
+                    <a href="#">Accounts</a>
+                    <a href="#">Payments</a>
+                    <a href="#">Cards</a>
+                    <a href="#">Transfers</a>
+                    <a href="#">Investments</a>
+                    <a href="#">Analytics</a>
+                    <a href="#">Settings</a>
+                </nav>
+            </div>
+
+            <!-- "disabled" is honest: the button isn't built yet, so it doesn't pretend to work -->
+            <button type="button" class="btn blue-btn upgrade-btn" disabled title="Coming soon">Upgrade Premium</button>
+
+        </aside>
+
+        <div class="main">
+
+            <!-- ================= TOP BAR ================= -->
+            <header class="topbar">
+
+                <input type="search" id="globalSearch" class="search-box"
+                       placeholder="Search transactions..." aria-label="Search transactions"
+                       autocomplete="off">
+
+                <div class="top-actions">
+                    <button type="button" class="btn green-btn" disabled title="Coming soon">Pay Bills</button>
+                    <button type="button" class="btn blue-btn" id="topTransferBtn">Transfer</button>
+                    <button type="button" class="theme-toggle" id="themeBtn" aria-label="Switch to light theme">☀</button>
+                </div>
+
+            </header>
+
+            <main id="main-content">
+
+                <h1 class="sr-only">NovaBank dashboard</h1>
+
+                <div class="dashboard">
+
+                    <!-- ============ BALANCES AND CHART ============ -->
+                    <section class="card balance-card" aria-labelledby="total-heading">
+
+                        <h2 id="total-heading" class="balance-subtitle">Total Balance</h2>
+                        <p class="balance" id="balance">$25,450.00</p>
+                        <p class="balance-subtitle" id="updatedAt">Updated just now</p>
+
+                        <div class="cards-grid">
+
+                            <div class="small-card">
+                                <h3 class="small-card-title">Savings</h3>
+                                <p class="account-amount" id="savingsBalance">$12,400.00</p>
+                            </div>
+
+                            <div class="small-card">
+                                <h3 class="small-card-title">Checking</h3>
+                                <p class="account-amount" id="checkingBalance">$8,750.00</p>
+                            </div>
+
+                            <div class="small-card">
+                                <h3 class="small-card-title">Investments</h3>
+                                <p class="account-amount" id="investmentBalance">$4,300.00</p>
+                            </div>
+
+                        </div>
+
+                        <div class="chart-container">
+                            <!-- The text inside the canvas is shown if the chart can't load; aria-label is updated by JavaScript -->
+                            <canvas id="balanceChart" role="img" aria-label="Chart of balances across your accounts">
+                                Chart of balances across your accounts.
+                            </canvas>
+                        </div>
+
+                        <!-- Demo card: only the last four digits, never a full number -->
+                        <div class="bank-card">
+
+                            <div class="card-row">
+                                <p>NovaBank Platinum</p>
+                                <p>VISA</p>
+                            </div>
+
+                            <p class="card-number">•••• •••• •••• 4921</p>
+
+                            <div class="card-row">
+                                <div>
+                                    <small>Card Holder</small>
+                                    <p class="card-detail">John Doe</p>
+                                </div>
+
+                                <div>
+                                    <small>Expires</small>
+                                    <p class="card-detail">08/29</p>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </section>
+
+                    <!-- ============ DEPOSIT / WITHDRAW / TRANSFER ============ -->
+                    <section class="card bank-panel" id="bankPanel" aria-labelledby="actions-heading">
+
+                        <h2 id="actions-heading">Banking Actions</h2>
+
+                        <div class="input-group">
+                            <label for="accountType">Account</label>
+                            <select id="accountType">
+                                <option value="checking">Checking Account</option>
+                                <option value="savings">Savings Account</option>
+                                <option value="investment">Investment Account</option>
+                            </select>
+                        </div>
+
+                        <div class="input-group">
+                            <label for="transferTo">Transfer To (transfers only)</label>
+                            <select id="transferTo">
+                                <option value="checking">Checking Account</option>
+                                <option value="savings" selected>Savings Account</option>
+                                <option value="investment">Investment Account</option>
+                            </select>
+                        </div>
+
+                        <div class="input-group">
+                            <label for="amount">Amount ($)</label>
+                            <input type="number" id="amount" placeholder="500"
+                                   min="0" max="1000000" step="0.01"
+                                   inputmode="decimal" autocomplete="off">
+                        </div>
+
+                        <div class="input-group">
+                            <label for="description">Description (optional)</label>
+                            <input type="text" id="description" placeholder="Salary deposit"
+                                   maxlength="60" autocomplete="off">
+                        </div>
+
+                        <button type="button" class="action-btn deposit-btn" id="depositBtn">Deposit Funds</button>
+                        <button type="button" class="action-btn withdraw-btn" id="withdrawBtn">Withdraw Funds</button>
+                        <button type="button" class="action-btn transfer-btn" id="transferBtn">Transfer Money</button>
+
+                        <!-- aria-live makes screen readers announce each new message -->
+                        <div class="message" id="message" role="status" aria-live="polite"></div>
+
+                        <button type="button" class="reset-btn" id="resetBtn">Reset demo data</button>
+
+                    </section>
+
+                    <!-- ============ TRANSACTIONS ============ -->
+                    <section class="card transactions" aria-labelledby="transactions-heading">
+
+                        <div class="transactions-header">
+
+                            <h2 id="transactions-heading">Recent Transactions</h2>
+
+                            <div class="filter-controls">
+                                <input type="search" id="txSearch" placeholder="Search transaction..."
+                                       aria-label="Search transactions in the table" autocomplete="off">
+
+                                <select id="typeFilter" aria-label="Filter by type">
+                                    <option value="all">All Transactions</option>
+                                    <option value="deposit">Deposits</option>
+                                    <option value="withdraw">Withdrawals</option>
+                                    <option value="transfer">Transfers</option>
+                                </select>
+                            </div>
+
+                        </div>
+
+                        <!-- The wrapper lets the table scroll sideways on small screens -->
+                        <div class="table-wrapper">
+
+                            <table>
+                                <caption class="sr-only">Recent transactions, newest first</caption>
+
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Date</th>
+                                        <th scope="col">Description</th>
+                                        <th scope="col">Category</th>
+                                        <th scope="col">Status</th>
+                                        <th scope="col">Amount</th>
+                                    </tr>
+                                </thead>
+
+                                <!-- Rows are built by JavaScript from the saved data (see js/ui.js) -->
+                                <tbody id="transactionTable"></tbody>
+                            </table>
+
+                        </div>
+
+                    </section>
+
+                    <!-- ============ INSIGHTS (static demo text) ============ -->
+                    <section class="insights-grid" aria-labelledby="insights-heading">
+
+                        <h2 id="insights-heading" class="sr-only">Insights</h2>
+
+                        <div class="insight-card">
+                            <h3>Spending Insights</h3>
+                            <p>Your food and entertainment expenses increased by 12% this month.</p>
+                        </div>
+
+                        <div class="insight-card">
+                            <h3>Savings Goal</h3>
+                            <p>You are 74% closer to achieving your yearly savings target.</p>
+                        </div>
+
+                        <div class="insight-card">
+                            <h3>Investment Growth</h3>
+                            <p>Your investment portfolio grew by 9.4% over the last quarter.</p>
+                        </div>
+
+                    </section>
+
+                </div>
+
+            </main>
+
+        </div>
+
+    </div>
+
+    <!-- Shown only on small screens (see style.css) -->
+    <nav class="mobile-nav" aria-label="Mobile">
+        <a href="#">Home</a>
+        <a href="#">Cards</a>
+        <a href="#">Transfer</a>
+        <a href="#">Payments</a>
+        <a href="#">Profile</a>
+    </nav>
+
+    <!-- type="module" lets main.js use import/export to load the other files.
+         Modules wait for the page to finish loading automatically. -->
+    <script type="module" src="js/main.js"></script>
+
+</body>
+</html>

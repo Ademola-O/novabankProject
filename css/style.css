@@ -1,0 +1,702 @@
+/* =====================================================================
+   style.css: ALL THE STYLING
+
+   Sections, in order:
+     1. Colours (CSS variables) and the light/dark themes
+     2. Base styles
+     3. Accessibility helpers
+     4. Layout: sidebar, top bar, dashboard
+     5. Components: cards, balances, forms, buttons, table, bank card
+     6. Responsive rules for tablets and phones
+     7. Reduced motion
+   ===================================================================== */
+
+
+/* ---------------------------------------------------------------------
+   1. COLOURS
+   CSS variables (custom properties) store a value once so it can be used
+   everywhere with var(--name). Changing the theme means changing these
+   variables in one place, not hunting through the whole file.
+   --------------------------------------------------------------------- */
+
+:root {
+    --bg: #07111f;
+    --card: #111827;
+    --card2: #1a2436;
+    --text: #ffffff;
+    --muted: #9ca3af;
+    --green: #22c55e;
+    --red: #ef4444;
+    --blue: #3b82f6;
+    --purple: #8b5cf6;
+    --border: rgba(255, 255, 255, 0.08);
+    --shadow: 0 15px 35px rgba(0, 0, 0, 0.35);
+
+    /* Tells the browser to draw its own controls (dropdown menus,
+       scrollbars, number spinners) in dark colours too */
+    color-scheme: dark;
+}
+
+/* The light theme. theme-init.js and theme.js set data-theme="light"
+   on <html>, and these values replace the dark ones above. */
+:root[data-theme="light"] {
+    --bg: #f3f4f6;
+    --card: #ffffff;
+    --card2: #f3f4f6;
+    --text: #111827;
+    --muted: #4b5563;      /* dark enough to be easy to read on white */
+    --border: rgba(0, 0, 0, 0.1);
+    --shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+
+    color-scheme: light;
+}
+
+
+/* ---------------------------------------------------------------------
+   2. BASE STYLES
+   --------------------------------------------------------------------- */
+
+/* Reset: remove the browser's default spacing and make padding
+   count INSIDE an element's width, which makes sizes easier to predict */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    transition: background 0.3s ease, color 0.3s ease;
+}
+
+/* Form controls don't inherit the page font by default, so we tell them to */
+button,
+input,
+select {
+    font: inherit;
+}
+
+/* Headings and paragraphs keep their natural look; we set sizes where needed */
+h1, h2, h3 {
+    line-height: 1.3;
+}
+
+
+/* ---------------------------------------------------------------------
+   3. ACCESSIBILITY HELPERS
+   --------------------------------------------------------------------- */
+
+/* Hides something visually but keeps it readable by screen readers */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* Appears only when a keyboard user tabs to it */
+.skip-link {
+    position: absolute;
+    left: 16px;
+    top: -60px;
+    background: var(--blue);
+    color: white;
+    padding: 12px 18px;
+    border-radius: 10px;
+    z-index: 2000;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.skip-link:focus {
+    top: 16px;
+}
+
+/* A clear outline around whatever has keyboard focus.
+   :focus-visible only shows for keyboard users, not mouse clicks. */
+:focus-visible {
+    outline: 3px solid var(--blue);
+    outline-offset: 2px;
+}
+
+
+/* ---------------------------------------------------------------------
+   4. LAYOUT
+   --------------------------------------------------------------------- */
+
+/* Two columns: a 260px sidebar and everything else */
+.app {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    min-height: 100vh;
+}
+
+/* ----- Sidebar ----- */
+
+.sidebar {
+    background: var(--card);
+    border-right: 1px solid var(--border);
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.logo {
+    font-size: 30px;
+    font-weight: 800;
+    color: var(--blue);
+    margin-bottom: 40px;
+}
+
+.nav-links {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.nav-links a {
+    text-decoration: none;
+    color: var(--muted);
+    padding: 14px 18px;
+    border-radius: 16px;
+    transition: 0.3s;
+    font-weight: 500;
+}
+
+/* The current page is marked with aria-current="page" in the HTML,
+   so the highlight and the screen reader announcement come from one place */
+.nav-links a:hover,
+.nav-links a[aria-current="page"] {
+    background: var(--blue);
+    color: white;
+}
+
+.upgrade-btn {
+    margin-top: 30px;
+}
+
+/* ----- Main area and top bar ----- */
+
+.main {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;   /* lets wide content (the table) shrink instead of stretching the page */
+}
+
+.topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 30px;
+    border-bottom: 1px solid var(--border);
+    position: sticky;   /* stays at the top while you scroll */
+    top: 0;
+    background: var(--bg);
+    z-index: 100;
+}
+
+.top-actions {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+}
+
+/* ----- Dashboard grid: a wide column and a narrow one ----- */
+
+.dashboard {
+    padding: 28px;
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 24px;
+}
+
+
+/* ---------------------------------------------------------------------
+   5. COMPONENTS
+   --------------------------------------------------------------------- */
+
+/* ----- Buttons ----- */
+
+.btn {
+    border: none;
+    border-radius: 14px;
+    padding: 12px 18px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: 0.3s;
+}
+
+.btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+}
+
+/* Buttons that aren't built yet look switched off */
+.btn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.blue-btn {
+    background: var(--blue);
+    color: white;
+}
+
+.green-btn {
+    background: var(--green);
+    color: black;
+}
+
+.theme-toggle {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: none;
+    background: var(--card);
+    color: var(--text);
+    cursor: pointer;
+}
+
+/* ----- Search boxes ----- */
+
+.search-box {
+    width: 320px;
+    padding: 14px 18px;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    background: var(--card);
+    color: var(--text);
+}
+
+/* ----- Cards ----- */
+
+.card {
+    background: var(--card);
+    border-radius: 24px;
+    padding: 24px;
+    box-shadow: var(--shadow);
+}
+
+.balance-card {
+    position: relative;
+    overflow: hidden;   /* hides the decorative circle where it sticks out */
+}
+
+/* A soft decorative circle in the corner (no HTML needed) */
+.balance-card::before {
+    content: '';
+    position: absolute;
+    width: 300px;
+    height: 300px;
+    background: rgba(59, 130, 246, 0.08);
+    border-radius: 50%;
+    top: -100px;
+    right: -100px;
+    pointer-events: none;   /* clicks go straight through it */
+}
+
+/* ----- Balances ----- */
+
+.balance-subtitle {
+    color: var(--muted);
+    font-size: 1rem;
+    font-weight: 400;
+}
+
+.balance {
+    font-size: 54px;
+    font-weight: 800;
+    margin: 18px 0;
+}
+
+.cards-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+    margin-top: 24px;
+}
+
+.small-card {
+    background: var(--card2);
+    padding: 20px;
+    border-radius: 18px;
+}
+
+.small-card-title {
+    color: var(--muted);
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.account-amount {
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.chart-container {
+    position: relative;   /* Chart.js needs this to size itself to the box */
+    margin-top: 30px;
+    height: 320px;
+}
+
+/* ----- Banking actions panel ----- */
+
+.bank-panel h2 {
+    margin-bottom: 24px;
+}
+
+.input-group {
+    margin-bottom: 18px;
+}
+
+.input-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--muted);
+}
+
+.input-group input,
+.input-group select {
+    width: 100%;
+    padding: 14px;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: var(--card2);
+    color: var(--text);
+}
+
+.action-btn {
+    width: 100%;
+    border: none;
+    padding: 16px;
+    border-radius: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 12px;
+    transition: 0.3s;
+}
+
+.action-btn:hover {
+    transform: translateY(-2px);
+}
+
+.deposit-btn {
+    background: var(--green);
+    color: black;
+}
+
+.withdraw-btn {
+    background: var(--red);
+    color: white;
+}
+
+.transfer-btn {
+    background: var(--purple);
+    color: white;
+}
+
+/* The message under the buttons. It's hidden until JavaScript gives it a
+   class of "success" or "error". */
+.message {
+    display: none;
+    margin-top: 16px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.5;
+}
+
+.message.success {
+    display: block;
+    background: rgba(34, 197, 94, 0.15);
+    color: var(--green);
+}
+
+.message.error {
+    display: block;
+    background: rgba(239, 68, 68, 0.15);
+    color: var(--red);
+}
+
+/* In the light theme the bright green and red are too pale on white,
+   so the message text uses darker versions for readability */
+:root[data-theme="light"] .message.success {
+    color: #15803d;
+}
+
+:root[data-theme="light"] .message.error {
+    color: #b91c1c;
+}
+
+.reset-btn {
+    display: block;
+    margin: 24px auto 0;
+    background: none;
+    border: none;
+    color: var(--muted);
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.reset-btn:hover {
+    color: var(--text);
+}
+
+/* ----- Transactions ----- */
+
+.transactions {
+    grid-column: 1 / -1;   /* span both columns */
+}
+
+.transactions-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.filter-controls {
+    display: flex;
+    gap: 12px;
+}
+
+.filter-controls input,
+.filter-controls select {
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--card2);
+    color: var(--text);
+}
+
+.table-wrapper {
+    overflow-x: auto;   /* scroll sideways on small screens instead of squashing */
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th {
+    text-align: left;
+    color: var(--muted);
+    padding-bottom: 18px;
+}
+
+td {
+    padding: 18px 12px 18px 0;
+    border-top: 1px solid var(--border);
+}
+
+/* Amount colours: green in, red out, purple for moves between your accounts.
+   The +/- sign is in the text too, so colour is never the only clue. */
+.amount-deposit {
+    color: var(--green);
+    font-weight: 700;
+}
+
+.amount-withdraw {
+    color: var(--red);
+    font-weight: 700;
+}
+
+.amount-transfer {
+    color: var(--purple);
+    font-weight: 700;
+}
+
+:root[data-theme="light"] .amount-deposit {
+    color: #15803d;
+}
+
+:root[data-theme="light"] .amount-withdraw {
+    color: #b91c1c;
+}
+
+:root[data-theme="light"] .amount-transfer {
+    color: #6d28d9;
+}
+
+.empty-row {
+    text-align: center;
+    color: var(--muted);
+    padding: 32px 0;
+}
+
+/* ----- Bank card ----- */
+
+.bank-card {
+    margin-top: 24px;
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    border-radius: 24px;
+    padding: 28px;
+    min-height: 220px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    color: white;
+}
+
+.card-number {
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: 3px;
+}
+
+.card-detail {
+    font-weight: 700;
+}
+
+.card-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* ----- Insights ----- */
+
+.insights-grid {
+    grid-column: 1 / -1;   /* span both columns */
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+}
+
+.insight-card {
+    background: var(--card);
+    border-radius: 20px;
+    padding: 24px;
+}
+
+.insight-card p {
+    color: var(--muted);
+    margin-top: 10px;
+    line-height: 1.6;
+}
+
+/* The mobile navigation bar is hidden until the screen is small */
+.mobile-nav {
+    display: none;
+}
+
+
+/* ---------------------------------------------------------------------
+   6. RESPONSIVE RULES
+   A media query applies its rules only when the screen matches.
+   --------------------------------------------------------------------- */
+
+/* Tablets and small laptops: stack everything in one column */
+@media (max-width: 1200px) {
+
+    .dashboard {
+        grid-template-columns: 1fr;
+    }
+
+    .insights-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Phones */
+@media (max-width: 768px) {
+
+    .app {
+        grid-template-columns: 1fr;
+    }
+
+    .sidebar {
+        display: none;
+    }
+
+    .topbar {
+        flex-direction: column;
+        gap: 16px;
+        align-items: stretch;
+    }
+
+    .top-actions {
+        justify-content: space-between;
+    }
+
+    .search-box {
+        width: 100%;
+    }
+
+    .dashboard {
+        padding: 16px;
+    }
+
+    .cards-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .balance {
+        font-size: 40px;
+    }
+
+    .transactions-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 16px;
+    }
+
+    .filter-controls {
+        flex-direction: column;
+    }
+
+    /* The bottom navigation bar appears, fixed to the screen's bottom edge */
+    .mobile-nav {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background: var(--card);
+        display: flex;
+        justify-content: space-around;
+        padding: 16px;
+        border-top: 1px solid var(--border);
+        z-index: 999;
+    }
+
+    .mobile-nav a {
+        text-decoration: none;
+        color: var(--muted);
+        font-size: 14px;
+    }
+
+    /* Leaves room so the fixed bar doesn't cover the end of the page */
+    .main {
+        padding-bottom: 90px;
+    }
+}
+
+
+/* ---------------------------------------------------------------------
+   7. REDUCED MOTION
+   Some people get dizzy or distracted by movement, and ask their device
+   to reduce it. This respects that setting.
+   --------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+
+    * {
+        transition: none !important;
+        animation: none !important;
+    }
+
+    .btn:hover:not(:disabled),
+    .action-btn:hover {
+        transform: none;
+    }
+}
