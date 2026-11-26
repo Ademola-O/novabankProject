@@ -2,8 +2,12 @@
 
 A banking dashboard built with plain HTML, CSS and JavaScript (no frameworks). Deposit, withdraw and transfer money between three accounts, see where your money is split in a chart, and search or filter your transactions. Your data is saved in your browser.
 
+<img width="1792" height="1040" alt="Screenshot 2026-11-26 at 00 51 14" src="https://github.com/user-attachments/assets/8f5491e9-8e30-4fe8-927b-8e5445f2aa20" />
 
-**Live demo:** <!-- paste your GitHub Pages link here -->
+<img width="1792" height="1040" alt="Screenshot 2026-11-26 at 00 52 38" src="https://github.com/user-attachments/assets/157349d9-3d9a-47b6-ab11-cccc1f8b3876" />
+
+
+**Live demo:**: https://ademola-o.github.io/novabankProject/
 
 ## Features
 
